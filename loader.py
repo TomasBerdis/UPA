@@ -1,11 +1,12 @@
+from numpy import NaN
 from pymongo import MongoClient
 import pandas
 import sys
 
 # connect to MongoDB
 print('Connecting to the database...', file=sys.stdout)
-#client = MongoClient('localhost', 27017)
-client = MongoClient("mongodb+srv://demo:demo@cluster0.qapgw.mongodb.net/upa?retryWrites=true&w=majority")
+client = MongoClient('localhost', 27017)
+#client = MongoClient("mongodb+srv://demo:demo@cluster0.qapgw.mongodb.net/upa?retryWrites=true&w=majority")
 
 
 # create/get database
@@ -77,9 +78,26 @@ def update_data():
             print("differs by",number_of_new_docs, "documnets.")
             drop_and_create(id,collection_name)
 
+def update_population():
+    kraj_data = pandas.read_csv("https://www.czso.cz/documents/62353418/143522504/130142-21data043021.csv", usecols=['vuzemi_cis', 'vuzemi_txt', 'hodnota', 'casref_do', 'pohlavi_kod'])
+    kraj_data = kraj_data.loc[kraj_data['casref_do'] == '2020-12-31']
+    kraj_data = kraj_data.loc[kraj_data['vuzemi_cis'] == 100]   # kraj
+    kraj_data = kraj_data.loc[kraj_data['pohlavi_kod'].isna()]  # NaN values
+    kraj_data = kraj_data.groupby(kraj_data['vuzemi_txt']).max()    # max NaN value (total for region)
+    kraj_data.pop('pohlavi_kod')
+    kraj_data.pop('vuzemi_cis')
+    kraj_data.pop('casref_do')
+
+    okres_data = pandas.read_csv("https://www.czso.cz/documents/62353418/143520482/130181-21data043021.csv", usecols=['vuzemi_txt', 'hodnota', 'vek_txt', 'pohlavi_kod'])
+    okres_data = okres_data.groupby(['vuzemi_txt', 'vek_txt']).sum().reset_index()
+    okres_data.pop('pohlavi_kod')
+    print()
+
+
 def drop_all():
     for collection_name in collection_names:
          db.drop_collection(collection_name)
 
 #drop_all()
+update_population()
 update_data()
