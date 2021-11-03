@@ -1,5 +1,6 @@
 #UPA - 1. část
 
+
 ###Instalace - 
 ###Spuštění - 
 ##Zvolené téma: 03: COVID-19 
@@ -28,5 +29,6 @@ https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/umrti.csv
 + Byla provedena transformace věku na intervalové hodnoty (0-14,...,85+). Následně se provedla agregace na základě data úmrtí a jednotlivých věkových intervalů. Frekvence agregace byla stanovena na dobu jednoho týdne. Výsledná data tedy vyjadřují počet covid umrtí za týden pro jednotlivé věkové kategorie po dobu pandemie.
 ######Zemřelí podle týdnů a věkových skupin v České republice
 + Data o celkovém umrtí se zredukovala pouze na záznamy za poslední dva roky, kdy probíhá pandemie. Schéma se zredukovalo pouze na jednotlivá úmrtí za týden pro konkrétní věkové kategorie.
+
 
 ####Plánované dotazy
