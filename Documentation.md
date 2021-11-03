@@ -32,3 +32,25 @@ Byla provedena transformace věku na intervalové hodnoty (0-14,...,85+). Násle
 Data o celkovém umrtí se zredukovala pouze na záznamy za poslední dva roky, kdy probíhá pandemie. Schéma se zredukovalo pouze na jednotlivá úmrtí za týden pro konkrétní věkové kategorie.
 
 #### Plánované dotazy
+##### Dotazy skupiny A
+- Čárový (spojnicový) graf zobrazující vývoj covidové situace po měsících pomocí následujících hodnot: počet nově nakažených za měsíc, počet nově vyléčených za měsíc, počet nově hospitalizovaných osob za měsíc, počet provedených testů za měsíc.
+
+- Série sloupcových grafů, které zobrazí:
+    1. graf: počty provedených očkování v jednotlivých krajích (celkový počet od začátku očkování).
+    2. graf: počty provedených očkování jako v předchozím bodě navíc rozdělené podle pohlaví. Diagram může mít např. dvě části pro jednotlivá pohlaví.
+    3. graf: Počty provedených očkování, ještě dále rozdělené dle věkové skupiny. Pro potřeby tohoto diagramu postačí 3 věkové skupiny (0-24 let, 25-59, nad 59).
+
+##### Dotazy skupiny B
+- 4 žebříčky krajů "best in covid" za poslední 4 čtvrtletí (1 čtvrtletí = 1 žebříček). Jako kritérium volte počet nově nakažených přepočtený na jednoho obyvatele kraje. Pro jedno čtvrtletí zobrazte výsledky také graficky. Graf bude pro každý kraj zobrazovat celkový počet nově nakažených, celkový počet obyvatel a počet nakažených na jednoho obyvatele.
+##### Dotazy skupiny C
+- Hledání skupin podobných měst z hlediska vývoje covidu a věkového složení obyvatel.
+    - Atributy: počet nakažených za poslední 4 čtvrtletí, počet očkovaných za poslední 4 čtvrtletí, počet obyvatel ve věkové skupině 0..14 let, počet obyvatel ve věkové skupině 15 - 59, počet obyvatel nad 59 let.
+    - Pro potřeby projektu vyberte libovolně 50 měst, pro které najdete potřebné hodnoty (můžete např. využít nějaký žebříček 50 nejlidnatějších měst v ČR).
+##### Vlastní dotazy
+1. Statistiky hospitalizovaných v rámci republiky
+    - Průběh nákazy u hospitalizovaných
+    - Typ hospitalizace
+    > COVID-19: Přehled hospitalizací
+2. Poměr počtu zemřelých na Covid a zemřelých celkově (po měsících a podle věkových skupin)
+    > Zemřelí podle týdnů a věkových skupin v České republice
+    > COVID-19: Přehled úmrtí dle hlášení krajských hygienických stanic
