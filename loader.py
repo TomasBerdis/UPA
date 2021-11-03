@@ -39,7 +39,10 @@ def drop_and_create(id, name):
 
     # load CSV data from API to MongoDB
     print(f'Loading data from {collection_sources[id]}...', file=sys.stdout, sep = '')
-    data_from_csv = pd.read_csv(collection_sources[id], usecols=collection_cols[id])
+    if name == "vaccination_demographic":
+        data_from_csv = pd.read_csv(collection_sources[id], usecols=collection_cols[id], parse_dates=["datum"])
+    else:
+        data_from_csv = pd.read_csv(collection_sources[id], usecols=collection_cols[id])
     data_dict = data_from_csv.to_dict('records')
     db[name].insert_many(data_dict)
     print(f'Data \'{name}\' was successfully updated to the database.', file=sys.stdout)
@@ -96,7 +99,7 @@ def update_deaths():
     db['covid_deaths'].insert_many(data_dict)
     print('Data', 'covid_deaths', 'was successfully updated to the database.', file=sys.stdout)
     
-    celkova_umrti_data = pd.read_csv("https://www.czso.cz/documents/62353418/155512385/130185-21data110221.csv", usecols=['casref_do', 'vek_txt', 'hodnota'])
+    celkova_umrti_data = pd.read_csv("https://www.czso.cz/documents/62353418/155512385/130185-21data110221.csv", usecols=['casref_do', 'vek_txt', 'hodnota'], parse_dates=["casref_do"])
     celkova_umrti_data = celkova_umrti_data.rename(columns={'casref_do': 'datum','hodnota': 'celkove_umrti'})
     celkova_umrti_data = celkova_umrti_data[celkova_umrti_data['vek_txt']!='celkem'] # delete category celkem
     celkova_umrti_data = celkova_umrti_data.loc[(celkova_umrti_data['datum'] >= '2020-01-01') & (celkova_umrti_data['datum'] <= '2021-12-31')] # filter only 2 last years
@@ -110,7 +113,7 @@ def update_deaths():
 def update_villages():
     print('Loading data from https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/obce.csv ...', file=sys.stdout, sep = '')
     collection_cols = ['datum','orp_kod','orp_nazev','nove_pripady']
-    villages_df = pd.read_csv("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/obce.csv", usecols=collection_cols)
+    villages_df = pd.read_csv("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/obce.csv", usecols=collection_cols, parse_dates=["datum"])
     villages_df = villages_df.groupby(['datum','orp_kod','orp_nazev']).sum().reset_index()
     villages_df_dict = villages_df.to_dict('records')
     db.drop_collection("villages")
@@ -124,10 +127,10 @@ def update_incremental_stats_and_hospitalized():
         'datum','prirustkovy_pocet_nakazenych', 'prirustkovy_pocet_vylecenych','prirustkovy_pocet_umrti',
         'prirustkovy_pocet_provedenych_testu', 'prirustkovy_pocet_provedenych_ag_testu'
     ]
-    incremental_stats_df = pd.read_csv("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.csv", usecols=incremental_stats_cols).sort_values(by=["datum"])
+    incremental_stats_df = pd.read_csv("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.csv", usecols=incremental_stats_cols,  parse_dates=["datum"]).sort_values(by=["datum"])
     
     print('Loading data from https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/hospitalizace.csv ...', file=sys.stdout, sep = '')
-    hospitalized_df = pd.read_csv("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/hospitalizace.csv").sort_values(by=["datum"])
+    hospitalized_df = pd.read_csv("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/hospitalizace.csv", parse_dates=["datum"]).sort_values(by=["datum"])
     
     incremental_stats_df = incremental_stats_df.merge(hospitalized_df[["datum", "pacient_prvni_zaznam"]], how='left')
     incremental_stats_df.rename(columns={
