@@ -1,7 +1,5 @@
 # Dokumentace 1. části projektu z předmětu UPA
 
-### Instalace - 
-### Spuštění - 
 ## Zvolené téma: 03: COVID-19 
 #### Vybrané zdroje
 - Český statistický úřad - https://www.czso.cz/
