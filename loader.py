@@ -115,8 +115,8 @@ def update_deaths():
     covid_umrti['datum'] = pandas.to_datetime(covid_umrti['datum'])
 
     bins = [0,15, 40, 65, 75, 85, 120]
-    labels = ['0-14', '15-39', '40-64', '65-74', '75-84', '85 a více']
-    covid_umrti['vek_txt'] = pandas.cut(covid_umrti.vek, bins, labels = labels,include_lowest = True, right=False)  # creates age intervals
+    labels = ['0-14', '15-39', '40-64', '65-74', '75-84', '85+']
+    covid_umrti['vek_txt'] = pandas.cut(covid_umrti.vek, bins, labels = labels, right=False)  # creates age intervals
     covid_umrti.pop('vek')
     covid_umrti=covid_umrti.groupby([pandas.Grouper(key='datum',freq='1W'),'vek_txt']).size().to_frame('covid_umrti') # group by date and age category
     covid_umrti=covid_umrti.reset_index()
@@ -129,7 +129,7 @@ def update_deaths():
     celkova_umrti_data = pandas.read_csv("https://www.czso.cz/documents/62353418/155512385/130185-21data110221.csv", usecols=['casref_do', 'vek_txt', 'hodnota'])
     celkova_umrti_data = celkova_umrti_data.rename(columns={'casref_do': 'datum','hodnota': 'celkove_umrti'})
     celkova_umrti_data = celkova_umrti_data[celkova_umrti_data['vek_txt']!='celkem'] # delete category celkem
-    celkova_umrti_data = celkova_umrti_data.loc[(celkova_umrti_data['datum'] > '2020-01-01') & (celkova_umrti_data['datum'] < '2021-31-12')] # filter only 2 last years
+    celkova_umrti_data = celkova_umrti_data.loc[(celkova_umrti_data['datum'] >= '2020-01-01') & (celkova_umrti_data['datum'] <= '2021-12-31')] # filter only 2 last years
     
     data_dict = celkova_umrti_data.to_dict('records')
     db['celkova_umrti'].insert_many(data_dict)
