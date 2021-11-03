@@ -113,6 +113,7 @@ def update_deaths():
     
     covid_umrti = pandas.read_csv("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/umrti.csv", usecols=['datum','vek'])
     covid_umrti['datum'] = pandas.to_datetime(covid_umrti['datum'])
+
     bins = [0,15, 40, 65, 75, 85, 120]
     labels = ['0-14', '15-39', '40-64', '65-74', '75-84', '85 a více']
     covid_umrti['vek_txt'] = pandas.cut(covid_umrti.vek, bins, labels = labels,include_lowest = True, right=False)  # creates age intervals
