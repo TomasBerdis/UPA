@@ -3,6 +3,7 @@ from pymongo import MongoClient
 import pandas
 import sys
 import re
+from datetime import datetime
 
 # connect to MongoDB
 print('Connecting to the database...', file=sys.stdout)
@@ -21,7 +22,6 @@ collection_names = ['nakazeni_vyleceni_umrti_testy'
                   , 'ockovani_kraje'
                   , 'ockovani_zakladni_prehled'
                   , 'vyleceni_kraje'
-                  , 'umrti'
                   #, 'obce'
                 ]
 
@@ -32,7 +32,6 @@ collection_sources = ["https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakaz
                     , "https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/ockovani.csv"
                     , "https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/ockovani-zakladni-prehled.csv"
                     , "https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/vyleceni.csv"
-                    , "https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/umrti.csv"
                     #, "https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/obce.csv"
                     ]
 
@@ -42,7 +41,6 @@ collection_cols = [['datum','prirustkovy_pocet_nakazenych', 'prirustkovy_pocet_v
                  #, ['datum','vek','pohlavi','kraj_nuts_kod','okres_lau_kod','nakaza_v_zahranici','nakaza_zeme_csu_kod']
                  , ['datum','vakcina','kraj_nuts_kod','kraj_nazev','vekova_skupina','prvnich_davek','druhych_davek','celkem_davek']
                  , ['kraj_nazev','kraj_nuts_kod','orp_bydliste','orp_bydliste_kod','vakcina','vakcina_kod','poradi_davky','vekova_skupina','pohlavi','pocet_davek']
-                 , ['datum','vek','pohlavi','kraj_nuts_kod','okres_lau_kod']
                  , ['datum','vek','pohlavi','kraj_nuts_kod','okres_lau_kod']
                  #, ['den','datum','kraj_nuts_kod','kraj_nazev','okres_lau_kod','okres_nazev','orp_kod','orp_nazev','obec_kod','obec_nazev','nove_pripady','aktivni_pripady','nove_pripady_65','nove_pripady_7_dni','nove_pripady_14_dni']
                 ]
@@ -102,17 +100,40 @@ def update_population():
         age.append(int(row))
     obec_data['vek'] = age
     obec_data.pop('vek_txt')
-
+    
     data_dict = obec_data.to_dict('records')
     db['obyvatelstvo_obce'].insert_many(data_dict)
     print('Data', 'obyvatelstvo_obce', 'was successfully updated to the database.', file=sys.stdout)
 
-    celkova_umrti_data = pandas.read_csv("https://www.czso.cz/documents/62353418/155512385/130185-21data110221.csv", usecols=['rok', 'tyden', 'casref_od', 'casref_do', 'vek_txt', 'hodnota'])
+    update_deaths()
+
+   
+
+def update_deaths():
+    
+    covid_umrti = pandas.read_csv("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/umrti.csv", usecols=['datum','vek'])
+    covid_umrti['datum'] = pandas.to_datetime(covid_umrti['datum'])
+    bins = [0,15, 40, 65, 75, 85, 120]
+    labels = ['0-14', '15-39', '40-64', '65-74', '75-84', '85 a více']
+    covid_umrti['vek_txt'] = pandas.cut(covid_umrti.vek, bins, labels = labels,include_lowest = True, right=False)  # creates age intervals
+    covid_umrti.pop('vek')
+    covid_umrti=covid_umrti.groupby([pandas.Grouper(key='datum',freq='1W'),'vek_txt']).size().to_frame('covid_umrti') # group by date and age category
+    covid_umrti=covid_umrti.reset_index()
+
+    data_dict = covid_umrti.to_dict('records')
+    db['covid_umrti'].insert_many(data_dict)
+    print('Data', 'covid_umrti', 'was successfully updated to the database.', file=sys.stdout)
+    
+
+    celkova_umrti_data = pandas.read_csv("https://www.czso.cz/documents/62353418/155512385/130185-21data110221.csv", usecols=['casref_do', 'vek_txt', 'hodnota'])
+    celkova_umrti_data = celkova_umrti_data.rename(columns={'casref_do': 'datum','hodnota': 'celkove_umrti'})
+    celkova_umrti_data = celkova_umrti_data[celkova_umrti_data['vek_txt']!='celkem'] # delete category celkem
+    celkova_umrti_data = celkova_umrti_data.loc[(celkova_umrti_data['datum'] > '2020-01-01') & (celkova_umrti_data['datum'] < '2021-31-12')] # filter only 2 last years
     
     data_dict = celkova_umrti_data.to_dict('records')
     db['celkova_umrti'].insert_many(data_dict)
     print('Data', 'celkova_umrti', 'was successfully updated to the database.', file=sys.stdout)
-
+      
 def drop_all():
     for collection_name in collection_names:
          db.drop_collection(collection_name)
