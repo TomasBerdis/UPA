@@ -6,8 +6,8 @@ import re
 
 # connect to MongoDB
 print('Connecting to the database...', file=sys.stdout)
-client = MongoClient('localhost', 27017)
-#client = MongoClient("mongodb+srv://demo:demo@cluster0.qapgw.mongodb.net/upa?retryWrites=true&w=majority")
+#client = MongoClient('localhost', 27017)
+client = MongoClient("mongodb+srv://demo:demo@cluster0.qapgw.mongodb.net/upa?retryWrites=true&w=majority")
 
 
 # create/get database
@@ -89,6 +89,10 @@ def update_population():
     kraj_data.pop('vuzemi_cis')
     kraj_data.pop('casref_do')
 
+    data_dict = kraj_data.to_dict('records')
+    db['obyvatelstvo_kraje'].insert_many(data_dict)
+    print('Data', 'obyvatelstvo_kraje', 'was successfully updated to the database.', file=sys.stdout)
+
     obec_data = pandas.read_csv("https://www.czso.cz/documents/62353418/143520482/130181-21data043021.csv", usecols=['vuzemi_txt', 'vek_txt', 'pohlavi_kod', 'hodnota'])
     obec_data = obec_data.groupby(['vuzemi_txt', 'vek_txt']).sum().reset_index()
     obec_data.pop('pohlavi_kod')
@@ -98,8 +102,16 @@ def update_population():
         age.append(int(row))
     obec_data['vek'] = age
     obec_data.pop('vek_txt')
-    print()
 
+    data_dict = obec_data.to_dict('records')
+    db['obyvatelstvo_obce'].insert_many(data_dict)
+    print('Data', 'obyvatelstvo_obce', 'was successfully updated to the database.', file=sys.stdout)
+
+    celkova_umrti_data = pandas.read_csv("https://www.czso.cz/documents/62353418/155512385/130185-21data110221.csv", usecols=['rok', 'tyden', 'casref_od', 'casref_do', 'vek_txt', 'hodnota'])
+    
+    data_dict = celkova_umrti_data.to_dict('records')
+    db['celkova_umrti'].insert_many(data_dict)
+    print('Data', 'celkova_umrti', 'was successfully updated to the database.', file=sys.stdout)
 
 def drop_all():
     for collection_name in collection_names:
