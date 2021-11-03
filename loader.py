@@ -113,13 +113,14 @@ def update_deaths():
     
     covid_umrti = pandas.read_csv("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/umrti.csv", usecols=['datum','vek'])
     covid_umrti['datum'] = pandas.to_datetime(covid_umrti['datum'])
-    bins = [0,15, 40, 65, 75, 85, 100]
+
+    bins = [0,15, 40, 65, 75, 85, 120]
     labels = ['0-14', '15-39', '40-64', '65-74', '75-84', '85 a více']
-    covid_umrti['vek_txt'] = pandas.cut(covid_umrti.vek, bins, labels = labels,include_lowest = True)  # creates age intervals
+    covid_umrti['vek_txt'] = pandas.cut(covid_umrti.vek, bins, labels = labels,include_lowest = True, right=False)  # creates age intervals
     covid_umrti.pop('vek')
     covid_umrti=covid_umrti.groupby([pandas.Grouper(key='datum',freq='1W'),'vek_txt']).size().to_frame('covid_umrti') # group by date and age category
     covid_umrti=covid_umrti.reset_index()
-    
+
     data_dict = covid_umrti.to_dict('records')
     db['covid_umrti'].insert_many(data_dict)
     print('Data', 'covid_umrti', 'was successfully updated to the database.', file=sys.stdout)
