@@ -2,3 +2,6 @@
 pandas
 pymongo
 numpy
+scipy
+matplotlib
+seaborn
