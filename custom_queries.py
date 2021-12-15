@@ -34,41 +34,46 @@ def load_hospitalized():
 
     return hospitalized_df
 
+
 def A1():
     incremental_stats = pd.read_csv("A1.csv", parse_dates=["datum"]).sort_values(by=["datum"])
     test_stats = pd.DataFrame(data=incremental_stats, columns=['datum'])
     test_stats['Provedené testy'] = incremental_stats['pcr_testov'] + incremental_stats['ag_testov']
-
     del incremental_stats['pcr_testov']
     del incremental_stats['ag_testov']
     del incremental_stats['umrti']
+
     incremental_stats.rename(columns = {'datum':'Datum', 'nakazenych':'Nově nakažení', 'vyliecenych':'Nově vyléčení', 'hospitalizovany':'Nově hospitalizovaní'}, inplace = True)
     test_stats.rename(columns = {'datum':'Datum'}, inplace=True)
-    
-    sns.set_style("dark")
 
     fig = plt.figure(figsize=(20,10))
-    plot_1=fig.add_subplot(211)
+
+    fig.add_subplot(211)
     l_plot = sns.lineplot(x='Datum', y='value', hue='Proměnná', 
              data=pd.melt(incremental_stats, ['Datum'], var_name='Proměnná'))
     l_plot.set(xlabel ="Datum", ylabel = "Hodnota", title ='Statistiky v rámci ČR')
     
-    plot_2=fig.add_subplot(212)
+    fig.add_subplot(212)
     sns.lineplot(x='Datum', y='Provedené testy', 
              data=test_stats)
-             
+
     plt.show()
 
 
-if __name__ == "__main__":
-    A1()
+def B():
+    population = pd.read_csv("B_population.csv")
+    villages = pd.read_csv("B.csv", parse_dates=["datum"]).sort_values(by=["datum"])
 
-    covid_deaths, total_deaths = load_deaths()
-    hospitalized = load_hospitalized()
+    # fig = plt.figure(figsize=(20,10))
+    # TODO
 
+    
+def Custom1():
     # 1 custom task - Statistiky hospitalizovaných v rámci republiky
         ## Průběh nákazy u hospitalizovaných
         ## Typ hospitalizace
+    
+    hospitalized = load_hospitalized()
    
     # clear nan values
     hospitalized_clear=hospitalized.dropna(how='any').reset_index()
@@ -110,9 +115,11 @@ if __name__ == "__main__":
     plot_2.set_ylabel('Počet hospitalizovaných', fontweight='bold')
     plot_2.set_xlim([hospitalized_clear['datum'][0], hospitalized_clear['datum'].iloc[-1]])
 
-    #################################################################################################################################################################################################
 
+def Custom2():
     # 2 custom task - Poměr počtu zemřelých na Covid a zemřelých celkově (po měsících a podle věkových skupin)
+    
+    covid_deaths, total_deaths = load_deaths()
 
     # consistent vek_txt values
     total_deaths['vek_txt'] = total_deaths['vek_txt'].str.replace('85 a více', '85+')
@@ -192,6 +199,14 @@ if __name__ == "__main__":
 
     # show graphics
     plt.show()
-    
 
 
+if __name__ == "__main__":
+    sns.set_style("dark")
+    sns.set_context("talk")
+
+    # queries
+    A1()
+    B()
+    Custom1()
+    Custom2()
