@@ -34,8 +34,35 @@ def load_hospitalized():
 
     return hospitalized_df
 
+def A1():
+    incremental_stats = pd.read_csv("A1.csv", parse_dates=["datum"]).sort_values(by=["datum"])
+    test_stats = pd.DataFrame(data=incremental_stats, columns=['datum'])
+    test_stats['Provedené testy'] = incremental_stats['pcr_testov'] + incremental_stats['ag_testov']
+
+    del incremental_stats['pcr_testov']
+    del incremental_stats['ag_testov']
+    del incremental_stats['umrti']
+    incremental_stats.rename(columns = {'datum':'Datum', 'nakazenych':'Nově nakažení', 'vyliecenych':'Nově vyléčení', 'hospitalizovany':'Nově hospitalizovaní'}, inplace = True)
+    test_stats.rename(columns = {'datum':'Datum'}, inplace=True)
+    
+    sns.set_style("dark")
+
+    fig = plt.figure(figsize=(20,10))
+    plot_1=fig.add_subplot(211)
+    l_plot = sns.lineplot(x='Datum', y='value', hue='Proměnná', 
+             data=pd.melt(incremental_stats, ['Datum'], var_name='Proměnná'))
+    l_plot.set(xlabel ="Datum", ylabel = "Hodnota", title ='Statistiky v rámci ČR')
+    
+    plot_2=fig.add_subplot(212)
+    sns.lineplot(x='Datum', y='Provedené testy', 
+             data=test_stats)
+             
+    plt.show()
+
 
 if __name__ == "__main__":
+    A1()
+
     covid_deaths, total_deaths = load_deaths()
     hospitalized = load_hospitalized()
 
