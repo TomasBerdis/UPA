@@ -115,9 +115,9 @@ def update_deaths():
 
 def update_villages():
     print('Loading data from https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/obce.csv ...', file=sys.stdout, sep = '')
-    collection_cols = ['datum','orp_kod','orp_nazev','nove_pripady']
+    collection_cols = ['datum','orp_kod','orp_nazev','kraj_nazev','nove_pripady']
     villages_df = pd.read_csv("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/obce.csv", usecols=collection_cols, parse_dates=["datum"])
-    villages_df = villages_df.groupby(['datum','orp_kod','orp_nazev']).sum().reset_index()
+    villages_df = villages_df.groupby(['datum','orp_kod','orp_nazev','kraj_nazev']).sum().reset_index()
     villages_df_dict = villages_df.to_dict('records')
     db.drop_collection("villages")
     db["villages"].insert_many(villages_df_dict)
@@ -141,7 +141,7 @@ def update_incremental_stats_and_hospitalized():
         'prirustkovy_pocet_vylecenych': 'vyliecenych',
         'prirustkovy_pocet_umrti': "umrti",
         'prirustkovy_pocet_provedenych_testu': 'pcr_testov',
-        'prirustkovy_pocet_provedenych_ag_testu': 'ag_testou',
+        'prirustkovy_pocet_provedenych_ag_testu': 'ag_testov',
         'pacient_prvni_zaznam': 'hospitalizovany'
     }, inplace=True)
     
@@ -159,8 +159,8 @@ def update_incremental_stats_and_hospitalized():
     
 
 if __name__ == "__main__":
-    update_data()
-    update_incremental_stats_and_hospitalized()
+    # update_data()
+    # update_incremental_stats_and_hospitalized()
     update_villages()
-    update_deaths()
-    update_population()
+    # update_deaths()
+    # update_population()
