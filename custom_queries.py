@@ -10,6 +10,8 @@ import datetime
 
 
 def A1():
+
+    # load and filter data
     incremental_stats = pd.read_csv("A1.csv", parse_dates=["datum"]).sort_values(by=["datum"])
     test_stats = pd.DataFrame(data=incremental_stats, columns=['datum'])
     test_stats['Provedené testy'] = incremental_stats['pcr_testov'] + incremental_stats['ag_testov']
@@ -17,20 +19,25 @@ def A1():
     del incremental_stats['ag_testov']
     del incremental_stats['umrti']
 
+    # renaming collumns
     incremental_stats.rename(columns = {'datum':'Datum', 'nakazenych':'Nově nakažení', 'vyliecenych':'Nově vyléčení', 'hospitalizovany':'Nově hospitalizovaní'}, inplace = True)
     test_stats.rename(columns = {'datum':'Datum'}, inplace=True)
+    
+    # join stats
+    stats=pd.merge(left=incremental_stats, right=test_stats)
+    
+    # fig size
+    plt.figure(figsize=(16,9))
 
-    fig = plt.figure(figsize=(20,10))
-
-    fig.add_subplot(211)
+    # line plot 
     l_plot = sns.lineplot(x='Datum', y='value', hue='Proměnná', 
-             data=pd.melt(incremental_stats, ['Datum'], var_name='Proměnná'))
+             data=pd.melt(stats, ['Datum'], var_name='Proměnná'))
     l_plot.set(xlabel ="Datum", ylabel = "Hodnota", title ='Statistiky v rámci ČR')
     
-    fig.add_subplot(212)
-    sns.lineplot(x='Datum', y='Provedené testy', 
-             data=test_stats)
-
+    # logaritmic scale
+    plt.yscale('log')
+    
+    # show graphics
     plt.show()
 
 
