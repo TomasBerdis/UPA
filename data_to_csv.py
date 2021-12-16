@@ -1,3 +1,4 @@
+from numpy import nan
 from pymongo import MongoClient
 import pandas as pd
 import sys
@@ -129,7 +130,7 @@ vaccinated_in_towns = vaccinated_in_towns.rename({
 
 
 positive_vaccineted_in_towns = positive_in_towns.merge(vaccinated_in_towns[["orp_nazev", "pocet_ockovanich_Q1", "pocet_ockovanich_Q2", "pocet_ockovanich_Q3", "pocet_ockovanich_Q4"]], how='left')
-positive_vaccineted_in_towns.merge(people_in_towns[["orp_nazev", "0-14", "15-59", "nad 59"]], how='left').set_index("orp_nazev").to_csv("C1.csv")
+positive_vaccineted_in_towns.merge(people_in_towns[["orp_nazev", "0-14", "15-59", "nad 59"]], how='left').set_index("orp_nazev").to_csv("C1-before.csv")
 
 
 # Custom 1
