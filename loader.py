@@ -16,15 +16,18 @@ db = client['upa']
 # database schema
 collection_names = [
     'vaccination_demographic',
+    'vaccination_geographic',
     'vaccination_basic_overview'
     ]
 
 
-collection_sources = ["https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/ockovani-demografie.csv"
+collection_sources = ["https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/ockovani-demografie.csv",
+                      "https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/ockovani-geografie.csv"
                     , "https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/ockovani-zakladni-prehled.csv"
                     ]
 
 collection_cols = [['datum', 'vakcina', 'vakcina_kod', 'poradi_davky', 'vekova_skupina', 'pohlavi', 'pocet_davek']
+                 , ['datum', 'vakcina', 'vakcina_kod', 'poradi_davky', 'kraj_nazev', 'kraj_nuts_kod', 'orp_bydliste', 'orp_bydliste_kod', 'pocet_davek']
                  , ['kraj_nazev','kraj_nuts_kod','orp_bydliste','orp_bydliste_kod','vakcina','vakcina_kod','poradi_davky','vekova_skupina','pohlavi','pocet_davek']
                 ]
 
@@ -39,7 +42,7 @@ def drop_and_create(id, name):
 
     # load CSV data from API to MongoDB
     print(f'Loading data from {collection_sources[id]}...', file=sys.stdout, sep = '')
-    if name == "vaccination_demographic":
+    if name == "vaccination_demographic" or name == "vaccination_geographic":
         data_from_csv = pd.read_csv(collection_sources[id], usecols=collection_cols[id], parse_dates=["datum"])
     else:
         data_from_csv = pd.read_csv(collection_sources[id], usecols=collection_cols[id])

@@ -16,6 +16,8 @@ incremental_stats.to_csv('A1.csv', index=False)
 
 # A3
 
+vaccination_basic_overview = pandas.DataFrame(db['vaccination_basic_overview'].find())  
+
 # B
 
 # C
