@@ -260,16 +260,17 @@ def Custom1():
     
     # create figure
     fig  = plt.figure(figsize=(16,9))
-   
     
+    #set datatime format
+    hospitalized_clear['datum'] = pd.to_datetime(hospitalized_clear['datum'])
+    date_format=mdates.DateFormatter('%Y-%m')
+
     # set params for subplot about hospitalized course of infection
     plot_1=fig.add_subplot(211)
     plot_1.xaxis.set_major_locator(ticker.MaxNLocator())
-    date_format=mdates.DateFormatter('%Y-%m')
     plot_1.xaxis.set_major_formatter(date_format)
-    plot_1.tick_params(axis='x', labelrotation= 30, labelsize=7)
+    plot_1.tick_params(axis='x', labelrotation= 30, labelsize=10)
     plot_1.set_title("Statistiky hospitalizovaných v rámci ČR",fontsize=20)
-    plot_1.set_xlabel('Datum', fontweight='bold')
     plot_1.set_ylabel('Počet hospitalizovaných', fontweight='bold')
 
     # create stackplot
@@ -282,7 +283,7 @@ def Custom1():
     plot_2=fig.add_subplot(212)
     plot_2.xaxis.set_major_locator(ticker.MaxNLocator())
     plot_2.xaxis.set_major_formatter(date_format)
-    plot_2.tick_params(axis='x', labelrotation= 30, labelsize=7)
+    plot_2.tick_params(axis='x', labelrotation= 30, labelsize=10)
 
     # create stackplot
     y=[hospitalized_clear['jip'],hospitalized_clear['kyslik'],hospitalized_clear['hfno'], hospitalized_clear['upv'], hospitalized_clear['ecmo'],hospitalized_clear['tezky_upv_ecmo']]
@@ -356,9 +357,9 @@ if __name__ == "__main__":
     sns.set_context("talk")
 
     # queries
-    A1()
-    A3()
-    B()
-    C()
+    #A1()
+    #A3()
+    #B()
+    #C()
     Custom1()
     Custom2()
