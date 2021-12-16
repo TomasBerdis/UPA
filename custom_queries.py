@@ -6,33 +6,7 @@ import matplotlib.ticker as ticker
 import matplotlib.dates as mdates
 from matplotlib.patches import Patch
 import matplotlib.pyplot as plt
-
-
-def load_deaths():
-    covid_umrti = pd.read_csv("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/umrti.csv", usecols=['datum','vek'])
-    covid_umrti['datum'] = pd.to_datetime(covid_umrti['datum'])
-    bins = [0,15, 40, 65, 75, 85, 100]
-    labels = ['0-14', '15-39', '40-64', '65-74', '75-84', '85+']
-    covid_umrti['vek_txt'] = pd.cut(covid_umrti.vek, bins, labels = labels, right=False)  # creates age intervals
-    covid_umrti.pop('vek')
-    covid_umrti=covid_umrti.groupby([pd.Grouper(key='datum',freq='1W'),'vek_txt']).size().to_frame('covid_umrti') # group by date and age category
-    covid_umrti=covid_umrti.reset_index()
-    
-    
-    celkova_umrti_data = pd.read_csv("https://www.czso.cz/documents/62353418/155512385/130185-21data110221.csv", usecols=['casref_do', 'vek_txt', 'hodnota'], parse_dates=["casref_do"])
-    celkova_umrti_data = celkova_umrti_data.rename(columns={'casref_do': 'datum','hodnota': 'celkove_umrti'})
-    celkova_umrti_data = celkova_umrti_data[celkova_umrti_data['vek_txt']!='celkem'] # delete category celkem
-    celkova_umrti_data = celkova_umrti_data.loc[(celkova_umrti_data['datum'] >= '2020-01-01') & (celkova_umrti_data['datum'] <= '2021-12-31')] # filter only 2 last years
-
-    return covid_umrti, celkova_umrti_data
-    
-def load_hospitalized():
-   
-    hospitalized_df = pd.read_csv("https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/hospitalizace.csv", parse_dates=["datum"]).sort_values(by=["datum"])
-      
-    hospitalized_df = hospitalized_df.drop(["pacient_prvni_zaznam", "kum_pacient_prvni_zaznam", "umrti", "kum_umrti"], axis=1)
-
-    return hospitalized_df
+import datetime
 
 
 def A1():
@@ -112,7 +86,7 @@ def Custom1():
         ## Průběh nákazy u hospitalizovaných
         ## Typ hospitalizace
     
-    hospitalized = load_hospitalized()
+    hospitalized = pd.read_csv("Custom_1_hospitalized.csv")
    
     # clear nan values
     hospitalized_clear=hospitalized.dropna(how='any').reset_index()
@@ -121,7 +95,7 @@ def Custom1():
     sns.set_theme(style="darkgrid")
     
     # create figure
-    fig  = plt.figure(figsize=(17,10))
+    fig  = plt.figure(figsize=(16,9))
    
     
     # set params for subplot about hospitalized course of infection
@@ -154,88 +128,55 @@ def Custom1():
     plot_2.set_ylabel('Počet hospitalizovaných', fontweight='bold')
     plot_2.set_xlim([hospitalized_clear['datum'][0], hospitalized_clear['datum'].iloc[-1]])
 
+    # show graphics
+    plt.show()
+
 
 def Custom2():
     # 2 custom task - Poměr počtu zemřelých na Covid a zemřelých celkově (po měsících a podle věkových skupin)
     
-    covid_deaths, total_deaths = load_deaths()
+    covid_deaths = pd.read_csv("Custom_2_covid_deaths.csv")
+    total_deaths = pd.read_csv("Custom_2_total_deaths.csv")
 
     # consistent vek_txt values
     total_deaths['vek_txt'] = total_deaths['vek_txt'].str.replace('85 a více', '85+')
     
     # inner join over total and covid deaths
     merged_deaths=pd.merge(total_deaths,covid_deaths, how='inner', on=['datum','vek_txt'])
+    
+    # set datetime format
+    merged_deaths['datum'] = pd.to_datetime(merged_deaths['datum'])
 
-    # group data to 1 month intervals
-    merged_deaths=merged_deaths.groupby([pd.Grouper(key='datum',freq='1M'),'vek_txt']).sum().reset_index()
+    # group data 1 month interval
+    merged_deaths=merged_deaths.groupby([pd.Grouper(key='datum',freq='1M'),'vek_txt']).sum().reset_index()  
+
+    # filter last year in data
+    merged_deaths=merged_deaths[(merged_deaths['datum'] > (merged_deaths['datum'].iloc[-1]- datetime.timedelta(days=365))) ].reset_index()
+    merged_deaths.pop('index')
+
+    # group data to 3 months intervals
+    merged_deaths=merged_deaths.groupby([pd.Grouper(key='datum',freq='3MS'),'vek_txt']).sum().reset_index()
 
     # set format of date 
-    merged_deaths['datum'] = merged_deaths['datum'].dt.strftime("%Y-%m")
-   
-    # create figure for second task
-    fig = plt.figure(figsize=(17,10))
-    # set width of bars
-    
-    # make the custum group bar plot showing death ratio between covid and total deaths based on age
-    
-    # create custom bars
-    barWidth = 0.15
-    
-    # compute x postions for every age group
-    cat=merged_deaths[merged_deaths["vek_txt"] == '0-14']
-    r1 = np.arange(len(cat))
-    r2 = [x + barWidth for x in r1]
-    r3 = [x + barWidth for x in r2]
-    r4 = [x + barWidth for x in r3]
-    r5 = [x + barWidth for x in r4]
-    r6 = [x + barWidth for x in r5]
-    wids=[r1,r2,r3,r4,r5,r6]
-    leg=['0-14','15-39','40-64','65-74','75-84', "85+"]
-    cols=sns.color_palette("ch:s=.25,rot=-.25", as_cmap=False)
+    merged_deaths['datum'] = merged_deaths['datum'].dt.strftime("%Y-%m")  
 
-    # plot individual charts for every age group
-    for age,wids,col in zip(leg,wids, cols):
-        
-        # filter data by age
-        cat=merged_deaths[merged_deaths["vek_txt"] == age]
-        
-        # total deaths
-        plt.bar(wids, cat['celkove_umrti'], color=col, width=barWidth, edgecolor='white', label=age)
+    # create new dataframe for categorcal type of death covid or normal
+    new_dataframe=pd.DataFrame(columns=['Od','úmrtí','Úmrtí', 'věk'])
 
-        # covid deaths
-        plt.bar(wids, cat['covid_umrti'], color='red', width=barWidth, edgecolor='white')
+    for _,row in merged_deaths.iterrows():
+        new_dataframe = new_dataframe.append({'Od' : row['datum'], 'úmrtí' : row['celkove_umrti'],'Úmrtí' : 'Celkově', 'věk' :row['vek_txt']}, ignore_index=True)
+        new_dataframe = new_dataframe.append({'Od' : row['datum'], 'úmrtí' : row['covid_umrti'],'Úmrtí' : 'Covid', 'věk' :row['vek_txt']},ignore_index=True)
        
-
+    # create 4 plots each one for 3 months interval and compare covid deaths to total deaths based on a age group
+    g= sns.catplot(x='věk', y='úmrtí', col= 'Od', data=new_dataframe, kind='bar', hue='Úmrtí', col_wrap=2, palette=['darkblue','red'])
+    g.fig.subplots_adjust(top=0.9, hspace=0.2)
+    g.fig.suptitle('Čtvrletní poměr celkového a covid úmrtí za poslední rok',fontsize=20)
+    g.set_titles("{col_var}: {col_name} ")
     
-    # add xticks on the middle of the group bars
-    plt.xlabel('Datum', fontweight='bold')
-    plt.xticks([r + barWidth for r in range(len(r1))],cat['datum'])
-    plt.tick_params(axis='x', labelrotation= 30, labelsize=7)
-
-    # y label
-    plt.ylabel('Celková úmrtí',fontweight='bold')
+    # set x labels for each sublot
+    for ax in g.axes.flatten():
+        ax.tick_params(labelbottom=True)
     
-
-    # function to add custom legend item
-    def add_patch(legend):
-        ax = legend.axes
-
-        handles, labels = ax.get_legend_handles_labels()
-        handles.append(Patch(facecolor='red', edgecolor='white'))
-        labels.append("covid")
-
-        legend._legend_box = None
-        legend._init_legend_box(handles, labels)
-        legend._set_loc(legend._loc)
-        legend.set_title('Věk')
-
-    # set title
-    plt.title("Poměr počtu zemřelých na Covid a zemřelých celkově podle věku",fontsize=20)
-
-    # create legend and add custom item
-    lgd=plt.legend()
-    add_patch(lgd)
-
     # show graphics
     plt.show()
 
