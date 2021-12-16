@@ -62,10 +62,42 @@ def A1():
 
 def B():
     population = pd.read_csv("B_population.csv")
+    population.rename(columns = {'vuzemi_txt':'kraj_nazev'}, inplace=True)
     villages = pd.read_csv("B.csv", parse_dates=["datum"]).sort_values(by=["datum"])
+    del villages['orp_kod']
+    del villages['orp_nazev']
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Královéhradecký kraj','HKK')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Jihočeský kraj','JHČ')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Jihomoravský kraj','JHM')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Karlovarský kraj','KVK')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Liberecký kraj','LBK')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Moravskoslezský kraj','MSK')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Olomoucký kraj','OLK')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Pardubický kraj','PAK')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Plzeňský kraj','PLK')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Hlavní město Praha','Praha')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Středočeský kraj','STČ')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Ústecký kraj','ULK')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Kraj Vysočina','VYS')
+    villages['kraj_nazev'] = villages['kraj_nazev'].str.replace('Zlínský kraj','ZLK')
 
-    # fig = plt.figure(figsize=(20,10))
-    # TODO
+    quarter1 = pd.DataFrame(data=villages)
+    quarter1 = quarter1[quarter1.datum.between('2021-01', '2021-03')]
+    quarter1 = quarter1.groupby(['datum', 'kraj_nazev'], as_index=False)['nove_pripady'].sum()
+    quarter1['datum'] = pd.to_datetime(quarter1['datum']) # convert Date to Datetime
+    quarter1 = quarter1.groupby('kraj_nazev')['nove_pripady'].sum()
+    # quarter1 = quarter1.set_index('datum')
+    # quarter1 = quarter1.groupby([pd.Grouper(freq='M'), 'kraj_nazev'])['nove_pripady'].sum()
+    quarter1 = quarter1.reset_index()
+    # quarter1 = quarter1.set_index('datum')
+    quarter1 = pd.merge(quarter1, population)
+    quarter1.rename(columns = {'kraj_nazev': 'Kraj', 'nove_pripady':'Nové případy' , 'hodnota':'Počet obyvatel'}, inplace=True)
+    quarter1['Přepočet na jednoho obyvatele'] = quarter1['Nové případy'] / quarter1['Počet obyvatel']
+
+    fig = plt.figure(figsize=(20, 10))
+    sns.catplot(data=quarter1)
+    
+    plt.show()
 
     
 def Custom1():
@@ -206,7 +238,7 @@ if __name__ == "__main__":
     sns.set_context("talk")
 
     # queries
-    A1()
+    # A1()
     B()
     Custom1()
-    Custom2()
+    # Custom2()
