@@ -207,7 +207,9 @@ def C():
         "pocet_ockovanich_Q1", "pocet_ockovanich_Q2", "pocet_ockovanich_Q3", "pocet_ockovanich_Q4",
         "0-14", "15-59", "nad 59"
     ]
-
+    print("=============================")
+    print("Dotaz C1:")
+    print("=============================")
     #odlahle hodnoty
     for col in check_outliers:
         Q1 = df[col].quantile(0.25)
@@ -219,6 +221,7 @@ def C():
         df[col] = np.where(df[col] < lower_bound, lower_bound, df[col])
         df[col] = np.where(df[col] > upper_bound, upper_bound, df[col])
         df[col] = df[col].astype("int64")
+    print("=============================")
 
     # normalizacia poctu nakazených v prvom kvartáli
     min_max_scaler = MinMaxScaler()
