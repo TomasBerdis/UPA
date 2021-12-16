@@ -2,30 +2,31 @@
 Repozitář pro projekt do předmětu UPA (VUT FIT 2021)
 
 ## Instalace
-Pred spúštaním samotných skriptov si je treba vytvoriť virtualne prostredie. V repozitáry projektu treba spustiť nasledujúci
-prikaz ktorý vytvorí virtualne prostredie (aby tento príkaz fungoval je treba mať nainštalovaný package `python3.9-venv` ten sa d8 nainštalovať pomocou príkazu `sudo get-apt install python3.9-venv`)
+Před spouštěním samotných skriptů je třeba si vytvořit virtualní prostředí. V repozitáři projektu je třeba spustit následující
+příkaz který vytvoří virtualní prostředí (aby tento příkaz fungoval je třeba mít nainstalovaný package `python3.9-venv` ten se d8 nainstalovat pomocí příkazu `sudo get-apt install python3.9-venv`) 
 
 ```python3.9 -m venv .venv```
 
-Nasledne je potrebne si virtualne prostredie aktivovať pomocou príkazu
+Následně je třeba si virtualní prostředí aktivovat pomocí příkazu 
 
 ```source .venv/bin/activate```
 
-Nasledne je už len potrebné doinštalovať posledné knižnice ktoré sú potrebné pre spustenie skriptov.
-
-```pip install -r requirements.txt```
+Následně je už jen potřeba nainstalovat knihovny, které jsou potřebné pro spuštění skriptů. 
+```pip3.9 install -r requirements.txt```
 
 ## Spuštění
 Před spuštením skriptu loader.py je potřebné mít spuštěný MongoDB server na localhost (port 27017)
 
 Načtení dat do databáze:
 
-`python ./loader.py`
+```python3.9 ./loader.py```
 
-Ak sú dáta načítane v databázi môžete spustiť program data_to_csv.py, ktorý extrakuje dáta z databáze do potrebných csv súborov pre jednotlivé dotazy.
+Pokud jsou data načtena v databázi můžete spustit program data_to_csv.py, který extrakuje data z databáze do potřebných csv souborů pro jednotlivé dotazy. 
 
-```python ./data_to_csv.py```
+```python3.9 ./data_to_csv.py```
 
-Ak sú jednotlivé csv súbory vytvorené tak je možné spustiť skript custom_queries.py, ktorý načíta jednotlivé csv súbory a uloží a vykreslí jednotlivé grafy, upraví dáta pre dotazy skupiny C a na štandarný výstup vypíše potrebné tabuľky a intervali ktoré sú použité v dokumentacii.pdf
+Pokud jsou jednotlivé csv soubory vytvořeny tak lze spustit skript custom_queries.py, který načte jednotlivé csv soubory a uloží, vykreslí jednotlivé grafy, upraví data pro dotazy skupiny C a na standardní výstup vypíše potřebné tabulky a intervaly které jsou použity v dokumentaci.pdf 
 
-```python ./custom_queries.py```
+```python3.9 ./custom_queries.py```
+
+Chcete-li ukončit a vypnout virtual environment stačí napsat příkaz `deactivate`.
