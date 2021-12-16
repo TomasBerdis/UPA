@@ -159,8 +159,8 @@ def update_incremental_stats_and_hospitalized():
     
 
 if __name__ == "__main__":
-    # update_data()
-    # update_incremental_stats_and_hospitalized()
+    update_data()
+    update_incremental_stats_and_hospitalized()
     update_villages()
-    # update_deaths()
-    # update_population()
+    update_deaths()
+    update_population()
