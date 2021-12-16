@@ -62,10 +62,49 @@ def A1():
 
 def B():
     population = pd.read_csv("B_population.csv")
+    population.rename(columns = {'vuzemi_txt':'kraj_nazev'}, inplace=True)
     villages = pd.read_csv("B.csv", parse_dates=["datum"]).sort_values(by=["datum"])
+    del villages['orp_kod']
+    del villages['orp_nazev']
+    translations = {'Královéhradecký kraj':'HKK',
+                    'Jihočeský kraj':'JHČ',
+                    'Jihomoravský kraj':'JHM',
+                    'Karlovarský kraj':'KVK',
+                    'Liberecký kraj':'LBK',
+                    'Moravskoslezský kraj':'MSK',
+                    'Olomoucký kraj':'OLK',
+                    'Pardubický kraj':'PAK',
+                    'Plzeňský kraj':'PLK',
+                    'Hlavní město Praha':'Praha',
+                    'Středočeský kraj':'STČ',
+                    'Ústecký kraj':'ULK',
+                    'Kraj Vysočina':'VYS',
+                    'Zlínský kraj':'ZLK'}
+    for key, value in translations.items():
+        villages['kraj_nazev']   = villages['kraj_nazev'].str.replace(key, value)
+        population['kraj_nazev'] = population['kraj_nazev'].str.replace(key, value)
 
-    # fig = plt.figure(figsize=(20,10))
-    # TODO
+    quarter1 = pd.DataFrame(data=villages)
+    quarter1 = quarter1[quarter1.datum.between('2021-01', '2021-03')]
+    quarter1 = quarter1.groupby(['datum', 'kraj_nazev'], as_index=False)['nove_pripady'].sum()
+    quarter1['datum'] = pd.to_datetime(quarter1['datum']) # convert Date to Datetime
+    quarter1 = quarter1.groupby('kraj_nazev')['nove_pripady'].sum()
+    quarter1 = quarter1.reset_index()
+    quarter1 = pd.merge(quarter1, population)
+    quarter1.rename(columns = {'kraj_nazev': 'Kraj', 'nove_pripady':'Nové případy' , 'hodnota':'Počet obyvatel'}, inplace=True)
+    quarter1['Přepočet na jednoho obyvatele'] = quarter1['Nové případy'] / quarter1['Počet obyvatel']
+    line_data1 = pd.DataFrame(quarter1[['Kraj', 'Přepočet na jednoho obyvatele']])
+    del quarter1['Přepočet na jednoho obyvatele']
+
+    ax1 = sns.set_style(style=None, rc=None)
+    fig, ax1 = plt.subplots(figsize=(12,6))
+    sns.lineplot(data = line_data1['Přepočet na jednoho obyvatele'], marker='o', sort=False, ax=ax1)
+    ax2 = ax1.twinx()
+    bar_data1 = pd.melt(quarter1, ['Kraj'], var_name='Proměnná', value_name='Hodnota')
+    plot_b1 = sns.barplot(data = bar_data1, x='Kraj', y='Hodnota', hue='Proměnná', alpha=0.5, ax=ax2)
+    plot_b1.set(title ='1. čtvrtletí 2021')
+
+    plt.show()
 
     
 def Custom1():
