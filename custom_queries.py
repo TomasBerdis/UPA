@@ -23,7 +23,10 @@ def A1():
     
     # join stats
     stats=pd.merge(left=incremental_stats, right=test_stats)
-    
+
+    # group by 1 month
+    stats=stats.groupby([pd.Grouper(key='Datum',freq='1M')]).sum().reset_index()
+
     # fig size
     plt.figure(figsize=(16,9))
 
