@@ -1,10 +1,8 @@
 import pandas as pd
 import numpy as np
 import seaborn as sns
-import matplotlib
 import matplotlib.ticker as ticker
 import matplotlib.dates as mdates
-from matplotlib.patches import Patch
 import matplotlib.pyplot as plt
 import datetime
 from sklearn.preprocessing import MinMaxScaler
