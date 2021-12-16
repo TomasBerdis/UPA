@@ -1,4 +1,3 @@
-from numpy import nan
 from pymongo import MongoClient
 import pandas as pd
 import sys
