@@ -245,7 +245,7 @@ if __name__ == "__main__":
     sns.set_context("talk")
 
     # queries
-    # A1()
+    A1()
     B()
     Custom1()
-    # Custom2()
+    Custom2()
