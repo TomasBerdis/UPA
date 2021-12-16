@@ -3,7 +3,7 @@ Repozitář pro projekt do předmětu UPA (VUT FIT 2021)
 
 ## Instalace
 Před spouštěním samotných skriptů je třeba si vytvořit virtualní prostředí. V repozitáři projektu je třeba spustit následující
-příkaz který vytvoří virtualní prostředí (aby tento příkaz fungoval je třeba mít nainstalovaný package `python3.9-venv` ten se d8 nainstalovat pomocí příkazu `sudo get-apt install python3.9-venv`) 
+příkaz který vytvoří virtualní prostředí (aby tento příkaz fungoval je třeba mít nainstalovaný package `python3.9-venv` ten se d8 nainstalovat pomocí příkazu `sudo apt-get install python3.9-venv`) 
 
 ```python3.9 -m venv .venv```
 
