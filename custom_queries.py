@@ -134,7 +134,7 @@ def A3():
     plt.show()
 
     total_gender_age_vaccination_basic_overview = vaccination_basic_overview.groupby(["Názov kraja", "Pohlavie", "Veková skupina"])["Počet dávok"].sum().reset_index()
-    plot = sns.catplot(data=total_gender_age_vaccination_basic_overview, x="Názov kraja", y="Počet dávok", col="Pohlavie", hue="Veková skupina", col_wrap=2, kind="bar",height=6, aspect=1.4, zorder=2)
+    plot = sns.catplot(data=total_gender_age_vaccination_basic_overview, x="Názov kraja", y="Počet dávok", col="Pohlavie", hue="Veková skupina", col_wrap=2, kind="bar",height=5, aspect=1.1, zorder=2)
 
     plot.set_titles("{col_name}", size=14).tight_layout()
 
