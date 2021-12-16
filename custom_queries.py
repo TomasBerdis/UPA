@@ -148,6 +148,7 @@ def A3():
     plt.show()
 
 def B():
+    # read csv data
     population = pd.read_csv("B_population.csv")
     population.rename(columns = {'vuzemi_txt':'kraj_nazev'}, inplace=True)
     villages = pd.read_csv("B.csv", parse_dates=["datum"]).sort_values(by=["datum"])
@@ -173,30 +174,42 @@ def B():
         villages['kraj_nazev']   = villages['kraj_nazev'].str.replace(key, value)
         population['kraj_nazev'] = population['kraj_nazev'].str.replace(key, value)
 
-    quarter1 = pd.DataFrame(data=villages)
-    quarter1 = quarter1[quarter1.datum.between('2021-01', '2021-03')]
-    quarter1 = quarter1.groupby(['datum', 'kraj_nazev'], as_index=False)['nove_pripady'].sum()
-    quarter1['datum'] = pd.to_datetime(quarter1['datum']) # convert Date to Datetime
-    quarter1 = quarter1.groupby('kraj_nazev')['nove_pripady'].sum()
-    quarter1 = quarter1.reset_index()
-    quarter1 = pd.merge(quarter1, population)
-    quarter1.rename(columns = {'kraj_nazev': 'Kraj', 'nove_pripady':'Nové případy' , 'hodnota':'Počet obyvatel'}, inplace=True)
-    quarter1['Přepočet na jednoho obyvatele'] = quarter1['Nové případy'] / quarter1['Počet obyvatel']
-    line_data1 = pd.DataFrame(quarter1[['Kraj', 'Přepočet na jednoho obyvatele']])
-    del quarter1['Přepočet na jednoho obyvatele']
-
+    # quartals charts
+    quarters=[]
+    dates=['2021-01', '2021-03','2021-07', '2021-10', '2022-01']
+    print("Genrating latex tables for quartals showing best in covid counties in CR, query B")
+    for quarter in range(4):
+        quarter1 = pd.DataFrame(data=villages)
+        quarter1 = quarter1[quarter1.datum.between(dates[quarter], dates[quarter+1])]
+        quarter1 = quarter1.groupby(['datum', 'kraj_nazev'], as_index=False)['nove_pripady'].sum()
+        quarter1['datum'] = pd.to_datetime(quarter1['datum']) # convert Date to Datetime
+        quarter1 = quarter1.groupby('kraj_nazev')['nove_pripady'].sum()
+        quarter1 = quarter1.reset_index()
+        quarter1 = pd.merge(quarter1, population)
+        quarter1.rename(columns = {'kraj_nazev': 'Kraj', 'nove_pripady':'Nové případy' , 'hodnota':'Počet obyvatel'}, inplace=True)
+        quarter1['Přepočet na jednoho obyvatele'] = quarter1['Nové případy'] / quarter1['Počet obyvatel']
+        quarter1.sort_values('Přepočet na jednoho obyvatele',inplace=True)
+        quarter1.reset_index(drop=True,inplace=True)
+        print(quarter1.to_latex(caption=str(quarter+1)+ ". čtvrtletí 2021", label=str(quarter+1)+ "Q"))
+        quarters.append(quarter1)
+        
+    # plot first quartal
+    line_data1 = pd.DataFrame(quarters[0][['Kraj', 'Přepočet na jednoho obyvatele']])
+    del quarters[0]['Přepočet na jednoho obyvatele']
     ax1 = sns.set_style(style=None, rc=None)
-    fig, ax1 = plt.subplots(figsize=(12,6))
+    fig, ax1 = plt.subplots(figsize=(16,9))
     sns.lineplot(data = line_data1['Přepočet na jednoho obyvatele'], marker='o', sort=False, ax=ax1)
     ax2 = ax1.twinx()
-    bar_data1 = pd.melt(quarter1, ['Kraj'], var_name='Proměnná', value_name='Hodnota')
-    plot_b1 = sns.barplot(data = bar_data1, x='Kraj', y='Hodnota', hue='Proměnná', alpha=0.5, ax=ax2)
-    plot_b1.set(title ='1. čtvrtletí 2021')
+    bar_data1 = pd.melt(quarters[0], ['Kraj'], var_name='Proměnná', value_name='Obyvatelé [mil]')
+    plot_b1 = sns.barplot(data = bar_data1, x='Kraj', y='Obyvatelé [mil]', hue='Proměnná', alpha=0.7, ax=ax2)
+    plot_b1.set_title('1. čtvrtletí 2021', fontsize=20)
+    plot_b1.legend(loc='upper left', bbox_to_anchor=(0, 1), ncol=2)
     plot_b1.set_xlabel("Kraje")
 
     # save image
     plt.savefig("B.pdf")
 
+    # show graphics
     plt.show()
 
 def C():
@@ -247,16 +260,17 @@ def Custom1():
     
     # create figure
     fig  = plt.figure(figsize=(16,9))
-   
     
+    #set datatime format
+    hospitalized_clear['datum'] = pd.to_datetime(hospitalized_clear['datum'])
+    date_format=mdates.DateFormatter('%Y-%m')
+
     # set params for subplot about hospitalized course of infection
     plot_1=fig.add_subplot(211)
     plot_1.xaxis.set_major_locator(ticker.MaxNLocator())
-    date_format=mdates.DateFormatter('%Y-%m')
     plot_1.xaxis.set_major_formatter(date_format)
-    plot_1.tick_params(axis='x', labelrotation= 30, labelsize=7)
+    plot_1.tick_params(axis='x', labelrotation= 30, labelsize=10)
     plot_1.set_title("Statistiky hospitalizovaných v rámci ČR",fontsize=20)
-    plot_1.set_xlabel('Datum', fontweight='bold')
     plot_1.set_ylabel('Počet hospitalizovaných', fontweight='bold')
 
     # create stackplot
@@ -269,7 +283,7 @@ def Custom1():
     plot_2=fig.add_subplot(212)
     plot_2.xaxis.set_major_locator(ticker.MaxNLocator())
     plot_2.xaxis.set_major_formatter(date_format)
-    plot_2.tick_params(axis='x', labelrotation= 30, labelsize=7)
+    plot_2.tick_params(axis='x', labelrotation= 30, labelsize=10)
 
     # create stackplot
     y=[hospitalized_clear['jip'],hospitalized_clear['kyslik'],hospitalized_clear['hfno'], hospitalized_clear['upv'], hospitalized_clear['ecmo'],hospitalized_clear['tezky_upv_ecmo']]
